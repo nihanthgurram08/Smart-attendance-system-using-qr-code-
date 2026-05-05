@@ -1,0 +1,167 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | Smart Attendance System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+
+        .login-box {
+            width: 350px;
+            margin: 120px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .link a {
+            text-decoration: none;
+            color: #007bff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-box">
+    <h2>Login</h2>
+
+    <form method="POST">
+        <input type="email" name="email" placeholder="Email" required>
+
+        <input type="password" name="password" placeholder="Password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <div class="link">
+        <p>New user? <a href="/register">Register here</a></p>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/scan.js') }}"></script>
+
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scan Attendance QR</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="scan-bg">
+<div class="fullscreen-container">
+    <div class="dashboard-card">
+
+        <h2>📷 Scan Attendance QR</h2>
+        <p class="subtitle">Paste QR data provided by faculty</p>
+
+        <form method="POST" action="/mark_attendance" id="attendanceForm">
+            <textarea name="qrdata" placeholder="Paste QR data here..." required></textarea>
+            
+            <input type="hidden" name="latitude" id="latitude">
+            <input type="hidden" name="longitude" id="longitude">
+            <input type="hidden" name="address" id="address">
+            <input type="hidden" name="accuracy" id="accuracy">
+
+            <button class="primary-btn" id="submitBtn" type="submit" disabled>
+                Getting Location...
+            </button>
+        </form>
+
+        <a href="/student" class="back-btn">← Back to Dashboard</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const btn = document.getElementById("submitBtn");
+
+        function setLocation(lat, lon, acc) {
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lon;
+            document.getElementById('accuracy').value = acc;
+            
+            if (!lat || !lon) {
+                document.getElementById('address').value = "Location Blocked";
+                btn.disabled = false;
+                btn.innerText = "✅ Mark Attendance";
+                return;
+            }
+
+            // Reverse geocode to get human-readable address
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('address').value = data.display_name || "Address not found";
+                    btn.disabled = false;
+                    btn.innerText = "✅ Mark Attendance";
+                })
+                .catch(() => {
+                    document.getElementById('address').value = "Address unavailable";
+                    btn.disabled = false;
+                    btn.innerText = "✅ Mark Attendance";
+                });
+        }
+
+        if (navigator.geolocation) {
+            // High accuracy to ensure we get exact student location
+            navigator.geolocation.getCurrentPosition(function(position) {
+                setLocation(
+                    position.coords.latitude, 
+                    position.coords.longitude, 
+                    position.coords.accuracy
+                );
+            }, function(error) {
+                console.warn("GPS failed, falling back to IP-based location.");
+                fetch("http://ip-api.com/json/")
+                    .then(response => response.json())
+                    .then(data => setLocation(data.lat, data.lon, "Approximate (IP)"))
+                    .catch(() => setLocation("", "", ""));
+            }, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        } else {
+            setLocation("", "", "");
+        }
+    });
+</script>
+
+</body>
+</html>

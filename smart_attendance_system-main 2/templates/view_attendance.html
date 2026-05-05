@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Records</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(
+                rgba(0,0,0,0.4),
+                rgba(0,0,0,0.4)
+            ),
+            url("{{ url_for('static', filename='images/attendance_bg.jpg') }}");
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 60px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: center;
+        }
+
+        th {
+            background: #4f46e5;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f3f4f6;
+        }
+
+        tr:hover {
+            background: #e0e7ff;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 28px;
+            background: linear-gradient(90deg, #34d399, #3b82f6);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+
+            th, td {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📋 Attendance Records</h2>
+
+    <table>
+        <tr>
+            <th>Student Name</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Location Details (Anti-Proxy)</th>
+        </tr>
+
+        {% for r in records %}
+        <tr>
+            <td>{{ r[0] }}</td>
+            <td>{{ r[1] }}</td>
+            <td>{{ r[2] }}</td>
+            <td>
+                {% if r[3] and r[4] %}
+                <a href="https://maps.google.com/?q={{ r[3] }},{{ r[4] }}" target="_blank" style="color: #4f46e5; text-decoration: none; font-weight: bold;">📍 View Map</a>
+                <div style="font-size: 0.85em; color: #555; margin-top: 4px; max-width: 250px;">
+                    <strong>Address:</strong> {{ r[5] if r[5] else "N/A" }}<br>
+                    <strong>Exact GPS:</strong> {{ r[3] }}, {{ r[4] }}<br>
+                    {% if r[6] %}
+                    <strong>Accuracy:</strong> ±{{ r[6] }}{{ 'm' if r[6] is number else '' }}
+                    {% endif %}
+                </div>
+                {% else %}
+                <span style="color: #888;">N/A (Location Blocked)</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div style="text-align:center;">
+        <a href="/faculty" class="back-btn">← Back to Dashboard</a>
+    </div>
+</div>
+
+</body>
+</html>
