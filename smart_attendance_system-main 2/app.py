@@ -479,7 +479,7 @@ def mark_attendance():
 
     if cursor.fetchone():
         conn.close()
-        return render_template("attendance_exists.html")
+        return render_template("attendance_error.html", message="Attendance already marked for this session")
 
     # Mark attendance with location metadata to prevent proxy status
     cursor.execute("""
