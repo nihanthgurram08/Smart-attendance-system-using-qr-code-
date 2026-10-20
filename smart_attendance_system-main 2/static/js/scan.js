@@ -14,14 +14,15 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Prevent duplicate attendance (basic client-side check)
-        if (sessionStorage.getItem("attendance_marked")) {
+        // Prevent duplicate attendance for the same QR (basic client-side check)
+        const markedKey = "attendance_marked_" + qrInput.value.trim();
+        if (sessionStorage.getItem(markedKey)) {
             alert("Attendance already submitted for this session.");
             event.preventDefault();
             return;
         }
 
         // Mark attendance as submitted
-        sessionStorage.setItem("attendance_marked", "true");
+        sessionStorage.setItem(markedKey, "true");
     });
 });
